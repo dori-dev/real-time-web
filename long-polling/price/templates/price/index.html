@@ -46,7 +46,7 @@
             `/new-data/?from=${fromDate.toISOString()}`
           );
           let data = await response.json();
-          if (data) {
+          if (data.length > 0) {
             chart.data.labels.push(
               data.map((item) => {
                 let date = new Date(item.created);

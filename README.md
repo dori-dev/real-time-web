@@ -2,9 +2,6 @@
 
 Real-time website implementation with different methods in Django.
 
-# Django OTP
-
-OTP verification with django.
 
 #
 

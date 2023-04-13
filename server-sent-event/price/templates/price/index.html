@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Time Web</title>
+  </head>
+  <body>
+    <div>
+      <canvas id="priceChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      let canvas = document.querySelector("#priceChart");
+      let fromDate = new Date();
+      let chart = new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "price",
+              data: [],
+            },
+          ],
+        },
+      });
+      let interval = 5 * 1000;
+      async function getData() {
+        let response = await fetch("/data/");
+        let data = await response.json();
+        chart.data.labels = data.map((item) => {
+          let date = new Date(item.created);
+          return date.toLocaleTimeString([], { hour12: false });
+        });
+        chart.data.datasets[0].data = data.map((item) => item.price);
+        chart.update();
+        connect2Stream();
+      }
+      function connect2Stream() {
+        var host = window.location.protocol + "//" + window.location.host;
+        const stream = new EventSource(`${host}/events/`);
+        stream.addEventListener("actions", (e) => {
+          console.log(e);
+          let item = JSON.parse(e.data);
+          if (item) {
+            let date = new Date(item.created);
+
+            chart.data.labels.push(
+              date.toLocaleTimeString([], { hour12: false })
+            );
+            chart.data.datasets[0].data.push(item.price);
+            chart.update();
+          }
+        });
+      }
+      getData();
+    </script>
+  </body>
+</html>
